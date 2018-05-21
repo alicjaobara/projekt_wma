@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/alicja/gnu/projekt_wma/src/projekt.cpp
+iostream
+-
+opencv2/opencv.hpp
+-
+opencv2/highgui/highgui.hpp
+-
+

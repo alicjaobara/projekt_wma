@@ -1,0 +1,3 @@
+/home/alicja/gnu/projekt_wma/build/CMakeFiles/rebuild_cache.dir
+/home/alicja/gnu/projekt_wma/build/CMakeFiles/projekt.dir
+/home/alicja/gnu/projekt_wma/build/CMakeFiles/edit_cache.dir
