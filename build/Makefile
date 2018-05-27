@@ -123,6 +123,19 @@ projekt/fast:
 	$(MAKE) -f CMakeFiles/projekt.dir/build.make CMakeFiles/projekt.dir/build
 .PHONY : projekt/fast
 
+#=============================================================================
+# Target rules for targets named projekt1
+
+# Build rule for target.
+projekt1: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 projekt1
+.PHONY : projekt1
+
+# fast build rule for target.
+projekt1/fast:
+	$(MAKE) -f CMakeFiles/projekt1.dir/build.make CMakeFiles/projekt1.dir/build
+.PHONY : projekt1/fast
+
 src/projekt.o: src/projekt.cpp.o
 
 .PHONY : src/projekt.o
@@ -150,6 +163,33 @@ src/projekt.cpp.s:
 	$(MAKE) -f CMakeFiles/projekt.dir/build.make CMakeFiles/projekt.dir/src/projekt.cpp.s
 .PHONY : src/projekt.cpp.s
 
+src/projekt1.o: src/projekt1.cpp.o
+
+.PHONY : src/projekt1.o
+
+# target to build an object file
+src/projekt1.cpp.o:
+	$(MAKE) -f CMakeFiles/projekt1.dir/build.make CMakeFiles/projekt1.dir/src/projekt1.cpp.o
+.PHONY : src/projekt1.cpp.o
+
+src/projekt1.i: src/projekt1.cpp.i
+
+.PHONY : src/projekt1.i
+
+# target to preprocess a source file
+src/projekt1.cpp.i:
+	$(MAKE) -f CMakeFiles/projekt1.dir/build.make CMakeFiles/projekt1.dir/src/projekt1.cpp.i
+.PHONY : src/projekt1.cpp.i
+
+src/projekt1.s: src/projekt1.cpp.s
+
+.PHONY : src/projekt1.s
+
+# target to generate assembly for a file
+src/projekt1.cpp.s:
+	$(MAKE) -f CMakeFiles/projekt1.dir/build.make CMakeFiles/projekt1.dir/src/projekt1.cpp.s
+.PHONY : src/projekt1.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -157,11 +197,15 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... projekt"
 	@echo "... edit_cache"
+	@echo "... projekt"
+	@echo "... projekt1"
 	@echo "... src/projekt.o"
 	@echo "... src/projekt.i"
 	@echo "... src/projekt.s"
+	@echo "... src/projekt1.o"
+	@echo "... src/projekt1.i"
+	@echo "... src/projekt1.s"
 .PHONY : help
 
 

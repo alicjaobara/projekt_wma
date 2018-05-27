@@ -13,7 +13,17 @@ endif(OpenCV_FOUND)
 # Definitions
 add_definitions(-DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\")
 
-# Declare a cpp executable (lab0)
+# Declare a cpp executable (projekt)
 add_executable(projekt src/projekt.cpp)
-# Specify libraries to link a library or executable target against (lab0)
+# Specify libraries to link a library or executable target against (projekt)
 target_link_libraries(projekt ${OpenCV_LIBS})
+
+# Declare a cpp executable (projekt1)
+add_executable(projekt1 src/projekt1.cpp)
+# Specify libraries to link a library or executable target against (projekt1)
+target_link_libraries(projekt1 ${OpenCV_LIBS})
+
+# Declare a cpp executable (main)
+#add_executable(main src/main.cpp)
+# Specify libraries to link a library or executable target against (main)
+#target_link_libraries(main ${OpenCV_LIBS})
