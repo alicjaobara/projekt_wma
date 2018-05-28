@@ -2,18 +2,18 @@
 #include <fstream>
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <opencv2/ml/ml.hpp>
-#include <stdexcept>
-#include <ios>
-#include <dirent.h>
+//#include <opencv2/ml/ml.hpp>
+//#include <stdexcept>
+//#include <ios>
+#include <dirent.h> //DIR
 
 using namespace std;
 using namespace cv;
 
 // Directory containing positive sample images
-static string posSamplesDir = "/home/alicja/gnu/projekt_wma/data/asl_alphabet_train/A";
+static string posSamplesDir = "/home/alicja/gnu/projekt_wma/data/asl_alphabet_train/A/";
 // Set the file to write the features to
-static string featuresFile = "/home/alicja/gnu/projekt_wma/data/hog_A.txt";
+static string featuresFile = "/home/alicja/gnu/projekt_wma/data/hogFeatures/hog_A.txt";
 
 //parametry do HOG
 static const Size trainingPadding = Size(0, 0);
@@ -59,6 +59,7 @@ static void calculateFeaturesFromInput(const string& imageFilename, vector<float
      * or the linking order is incorrect, try g++ -o openCVHogTrainer main.cpp `pkg-config --cflags --libs opencv`
      */
     Mat imageData = imread(imageFilename, IMREAD_GRAYSCALE);
+    resize(imageData, imageData, Size(64, 128));
     if (imageData.empty()) {
         featureVector.clear();
         printf("Error: HOG image '%s' is empty, features calculation skipped!\n", imageFilename.c_str());
@@ -68,7 +69,7 @@ static void calculateFeaturesFromInput(const string& imageFilename, vector<float
     if (imageData.cols != hog.winSize.width || imageData.rows != hog.winSize.height) {
         featureVector.clear();
         printf("Error: Image '%s' dimensions (%u x %u) do not match HOG window size (%u x %u)!\n", imageFilename.c_str(), imageData.cols, imageData.rows, hog.winSize.width, hog.winSize.height);
-        return;
+       return;
     }
     vector<Point> locations;
     hog.compute(imageData, featureVector, winStride, trainingPadding, locations);
@@ -119,7 +120,9 @@ static void getFilesInDirectory(const string& dirName, vector<string>& fileNames
 }
 int main(int argc, char** argv)
 {
-    string path = string(PROJECT_SOURCE_DIR) + "/data/asl_alphabet_test/B_test.jpg";
+    /*
+    string path = posSamplesDir+"A1.jpg";
+//    string path = string(PROJECT_SOURCE_DIR) + "/data/asl_alphabet_train/Atest/A1.jpg";
     Mat input = imread(path); //,IMREAD_GRAYSCALE)
     if (input.empty()) // Sprawdzenie, czy udalo sie otworzyc obraz z sciezka
     {
@@ -149,6 +152,7 @@ int main(int argc, char** argv)
     show(gx,"gx");
     show(gy,"gy");
     show(mag,"mag");
+    */
 
     // "/home/alicja/gnu/projekt_wma/data/asl_alphabet_test"
 
@@ -173,10 +177,14 @@ int main(int argc, char** argv)
             return EXIT_SUCCESS;
         }
 
+
+        /*
         /// @WARNING: This is really important, some libraries (e.g. ROS) seems to set the system locale which takes decimal commata instead of points which causes the file input parsing to fail
         setlocale(LC_ALL, "C"); // Do not use the system locale
         setlocale(LC_NUMERIC,"C");
         setlocale(LC_ALL, "POSIX");
+        */
+
 
         printf("Reading files, generating HOG features and save them to file '%s':\n", featuresFile.c_str());
         float percent;

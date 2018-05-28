@@ -1,1 +1,0 @@
-# Use this file to train, e.g. SVMlight by issuing $ svm_learn -i 1 -a weights.txt /home/alicja/gnu/projekt_wma/data/hog_A.txt

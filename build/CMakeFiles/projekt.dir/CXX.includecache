@@ -9,8 +9,12 @@
 /home/alicja/gnu/projekt_wma/src/projekt.cpp
 iostream
 -
+fstream
+-
 opencv2/opencv.hpp
 -
-fstream
+opencv2/highgui/highgui.hpp
+-
+dirent.h
 -
 

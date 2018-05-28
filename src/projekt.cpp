@@ -1,108 +1,158 @@
 #include <iostream>
-#include <opencv2/opencv.hpp>
 #include <fstream>
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <dirent.h> //DIR
 
 using namespace std;
 using namespace cv;
 
-// Directory containing positive sample images
-static string posSamplesDir = "/home/alicja/gnu/projekt_wma/data/asl_alphabet_train/A";
+// Directory containing sample images
+static string SamplesDir= "/home/alicja/gnu/projekt_wma/data/asl_alphabet_train/";
+
+//static string SamplesDirB = "/home/alicja/gnu/projekt_wma/data/asl_alphabet_train/B/";
 // Set the file to write the features to
-static string featuresFile = "/home/alicja/gnu/projekt_wma/data/hog_A.txt";
+static string featuresFile = "/home/alicja/gnu/projekt_wma/data/hogFeatures/hog.txt";
 
 //parametry do HOG
 static const Size trainingPadding = Size(0, 0);
-static const Size winStride = Size(0, 0);
+static const Size winStride = Size(8, 8);
 
-int show(Mat img, string okno){
+static vector<string> validExtensions;
+
+
+static void storeCursor(void) {
+    printf("\033[s");
+}
+
+static void resetCursor(void) {
+    printf("\033[u");
+}
+
+static string toLowerCase(const string& in) {
+    string t;
+    for (string::const_iterator i = in.begin(); i != in.end(); ++i) {
+        t += tolower(*i);
+    }
+    return t;
+}
+
+// pokazywanie obrazów
+int show(Mat img,string okno)
+{
     imshow(okno, img);
     waitKey(0);
     cout<<"wielkość "<<okno<<" "<<img.size()<<endl;
     destroyAllWindows();
     return 0;
 }
-
-void zapis(string featuresFile, vector< float> featureVector){
-    fstream File;
-    File.open(featuresFile.c_str(), ios::out);
-    if (File.good() && File.is_open()) {
-        File << "# Use this file to train, e.g. SVMlight by issuing $ svm_learn -i 1 -a weights.txt " << featuresFile.c_str() << endl; // Remove this line for libsvm which does not support comments
-            // Calculate feature vector from current image file
-            if (!featureVector.empty()) {
-                for (unsigned int feature = 0; feature < featureVector.size(); ++feature) {
-                    File << " " << (feature + 1) << ":" << featureVector.at(feature);
-                }
-                File << endl;
+static void calculateFeaturesFromInput(const string& imageFilename, vector<float>& featureVector, HOGDescriptor& hog) {
+    Mat imageData = imread(imageFilename, IMREAD_GRAYSCALE);
+    resize(imageData, imageData, Size(64, 128));
+    if (imageData.empty()) {
+        featureVector.clear();
+        printf("Error: HOG image '%s' is empty, features calculation skipped!\n", imageFilename.c_str());
+        return;
+    }
+    // Check for mismatching dimensions
+    if (imageData.cols != hog.winSize.width || imageData.rows != hog.winSize.height) {
+        featureVector.clear();
+        printf("Error: Image '%s' dimensions (%u x %u) do not match HOG window size (%u x %u)!\n", imageFilename.c_str(), imageData.cols, imageData.rows, hog.winSize.width, hog.winSize.height);
+        return;
+    }
+    vector<Point> locations;
+    hog.compute(imageData, featureVector, winStride, trainingPadding, locations);
+    imageData.release(); // Release the image again after features are extracted
+}
+static void getFilesInDirectory(const string& dirName, vector<string>& fileNames, const vector<string>& validExtensions) {
+    printf("Opening directory %s\n", dirName.c_str());
+    struct dirent* ep;
+    size_t extensionLocation;
+    DIR* dp = opendir(dirName.c_str());
+    if (dp != NULL) {
+        while ((ep = readdir(dp))) {
+            if (ep->d_type & DT_DIR) {
+                continue;
             }
+            extensionLocation = string(ep->d_name).find_last_of("."); // Assume the last point marks beginning of extension like file.ext
+            // Check if extension is matching the wanted ones
+            string tempExt = toLowerCase(string(ep->d_name).substr(extensionLocation + 1));
+            if (find(validExtensions.begin(), validExtensions.end(), tempExt) != validExtensions.end()) {
+                printf("Found matching data file '%s'\n", ep->d_name);
+                fileNames.push_back((string) dirName + ep->d_name);
+            } else {
+                printf("Found file does not match required file type, skipping: '%s'\n", ep->d_name);
+            }
+        }
+        (void) closedir(dp);
+    } else {
+        printf("Error opening directory '%s'!\n", dirName.c_str());
+    }
+    return;
+}
 
+int doPliku(string sign){
+    HOGDescriptor hog;
+    static vector<string> TrainingImages;
+    string SamplesDirCurrent = SamplesDir + sign + "/";
+    getFilesInDirectory(SamplesDirCurrent, TrainingImages, validExtensions);
+    unsigned long overallSamples = TrainingImages.size();
+    if (overallSamples == 0) {
+        printf("No training sample files found, nothing to do!\n");
+        return EXIT_SUCCESS;
+    }
+
+    printf("Reading files, generating HOG features and save them to file '%s':\n", featuresFile.c_str());
+    float percent;
+    fstream File;
+    File.open(featuresFile.c_str(), ios::out|ios::app);
+    if (File.good() && File.is_open()) {
+        // Iterate over sample images
+        for (unsigned long currentFile = 0; currentFile < overallSamples; ++currentFile) {
+            storeCursor();
+            vector<float> featureVector;
+            const string currentImageFile = TrainingImages.at(currentFile);
+            // Output progress
+            if ( (currentFile+1) % 10 == 0 || (currentFile+1) == overallSamples ) {
+                percent = ((currentFile+1) * 100 / overallSamples);
+                printf("%5lu (%3.0f%%):\tFile '%s'", (currentFile+1), percent, currentImageFile.c_str());
+                fflush(stdout);
+                resetCursor();
+            }
+            // Calculate feature vector from current image file
+            calculateFeaturesFromInput(currentImageFile, featureVector, hog);
+            if (!featureVector.empty()) {
+                // Save feature vector components
+                for (unsigned int feature = 0; feature < featureVector.size(); ++feature) {
+//                    if(feature == 1)
+//                        File << featureVector.at(feature);
+//                    else
+                        File << "," << featureVector.at(feature);
+                }
+                File << ", " <<sign << endl;
+            }
+        }
         printf("\n");
         File.flush();
         File.close();
-    } else {
-        printf("Error opening file '%s'!\n", featuresFile.c_str());
-
     }
-
+    else {
+        printf("Error opening file '%s'!\n", featuresFile.c_str());
+        return EXIT_FAILURE;
+    }
 }
 
-int main()
+int main(int argc, char** argv)
 {
-
-    //image load
-    Mat img1 = imread(string(PROJECT_SOURCE_DIR) + "/data/asl_alphabet_test/B_test.jpg");
-    show(img1,"img1");
-    Mat img2 = imread(string(PROJECT_SOURCE_DIR) + "/data/asl_alphabet_train/B/B2.jpg");
-    show(img2,"img2");
-
-    //rgb 2 gray
-    Mat img1_gray;
-    cvtColor(img1, img1_gray, CV_RGB2GRAY);
-
-    Mat img2_gray;
-    cvtColor(img2, img2_gray, CV_RGB2GRAY);
-
-    //resize smaller
-    Mat r_img1_gray;
-    resize(img1_gray, r_img1_gray, Size(64, 128));
-    Mat r_img2_gray;
-    resize(img2_gray, r_img2_gray, Size(64, 128));
-
-    show(r_img1_gray,"img1 gray r");
-    show(r_img2_gray,"img2 gray r");
-
-    //extractino hog feature
-    HOGDescriptor d1( Size(64,8), Size(8,8), Size(4,4), Size(4,4), 9);
-    HOGDescriptor d2( Size(64,8), Size(8,8), Size(4,4), Size(4,4), 9);
-    // Size(32,16), //winSize
-    // Size(8,8), //blocksize
-    // Size(4,4), //blockStride,
-    // Size(4,4), //cellSize,
-    // 9, //nbins,
-
-    //hog feature compute
-    vector< float> descriptorsValues1;
-    vector< Point> locations1;
-    d1.compute( r_img1_gray, descriptorsValues1, trainingPadding, winStride, locations1);
-    vector< float> descriptorsValues2;
-    vector< Point> locations2;
-    d2.compute( r_img2_gray, descriptorsValues2, trainingPadding, winStride, locations2);
-
-    //hog feature size
-    //cout << descriptorsValues1.size() << endl;
-
-    /*
-    //copy vector to mat
-    //create Mat
-    Mat A(descriptorsValues1.size(),1,CV_32FC1);
-    //copy vector to mat
-    memcpy(A.data,descriptorsValues1.data(),descriptorsValues1.size()*sizeof(float));
-    //create Mat
-    Mat B(descriptorsValues2.size(),1,CV_32FC1);
-    //copy vector to mat
-    memcpy(B.data,descriptorsValues2.data(),descriptorsValues2.size()*sizeof(float));
-    */
-
-    zapis(featuresFile, descriptorsValues1);
+    validExtensions.push_back("jpg");
+    fstream File;
+    File.open(featuresFile.c_str(), ios::out);
+    if (File.good() && File.is_open()) {
+        File << "first line" << endl;
+        File.flush();
+        File.close();
+    }
+    doPliku("A");
 
 
     return 0;

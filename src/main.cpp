@@ -122,13 +122,7 @@ static void resetCursor(void) {
     printf("\033[u");
 }
 
-/**
- * Saves the given descriptor vector to a file
- * @param descriptorVector the descriptor vector to save
- * @param _vectorIndices contains indices for the corresponding vector values (e.g. descriptorVector(0)=3.5f may have index 1)
- * @param fileName
- * @TODO Use _vectorIndices to write correct indices
- */
+
 static void saveDescriptorVectorToFile(vector<float>& descriptorVector, vector<unsigned int>& _vectorIndices, string fileName) {
     printf("Saving descriptor vector to file '%s'\n", fileName.c_str());
     string separator = " "; // Use blank as default separator between single features

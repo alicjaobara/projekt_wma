@@ -15,12 +15,6 @@ opencv2/opencv.hpp
 -
 opencv2/highgui/highgui.hpp
 -
-opencv2/ml/ml.hpp
--
-stdexcept
--
-ios
--
 dirent.h
 -
 
