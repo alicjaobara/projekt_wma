@@ -7,12 +7,12 @@
 using namespace std;
 using namespace cv;
 
-// Directory containing sample images
-static string SamplesDir= "/home/alicja/gnu/projekt_wma/data/asl_alphabet_train/";
+static string path = string(PROJECT_SOURCE_DIR)+"/data/";
 
-//static string SamplesDirB = "/home/alicja/gnu/projekt_wma/data/asl_alphabet_train/B/";
+// Directory containing sample images
+static string samplesDir= path+"asl_alphabet_train/";
 // Set the file to write the features to
-static string featuresFile = "/home/alicja/gnu/projekt_wma/data/hogFeatures/hog.txt";
+static string featuresFile = path+"hogFeatures/hog.txt";
 
 //parametry do HOG
 static const Size trainingPadding = Size(0, 0); //brzegi
@@ -37,14 +37,14 @@ static string toLowerCase(const string& in) {
 }
 
 // pokazywanie obrazów
-int show(Mat img,string okno)
-{
-    imshow(okno, img);
-    waitKey(0);
-    cout<<"wielkość "<<okno<<" "<<img.size()<<endl;
-    destroyAllWindows();
-    return 0;
-}
+//int show(Mat img,string okno)
+//{
+//    imshow(okno, img);
+//    waitKey(0);
+//    cout<<"wielkość "<<okno<<" "<<img.size()<<endl;
+//    destroyAllWindows();
+//    return 0;
+//}
 
 static void calculateFeaturesFromInput(const string& imageFilename, vector<float>& featureVector, HOGDescriptor& hog) {
     Mat imageData = imread(imageFilename, IMREAD_GRAYSCALE);
@@ -93,10 +93,11 @@ static void getFilesInDirectory(const string& dirName, vector<string>& fileNames
 }
 
 int doPliku(string sign){
-    HOGDescriptor hog;
+    HOGDescriptor hog( Size(64,128), Size(16,16), Size(16,16), Size(16,16), 9);
+//    HOGDescriptor hog;
     static vector<string> TrainingImages;
     TrainingImages.clear();
-    string SamplesDirCurrent = SamplesDir + sign + "/";
+    string SamplesDirCurrent = samplesDir + sign + "/";
     getFilesInDirectory(SamplesDirCurrent, TrainingImages, validExtensions);
     unsigned long overallSamples = TrainingImages.size();
     if (overallSamples == 0) {
@@ -144,6 +145,9 @@ int doPliku(string sign){
                 case 66:
                     i=2;
                     break;
+                case 67:
+                    i=3;
+                    break;
                 }
                 File << ", " << i << endl;
             }
@@ -168,9 +172,9 @@ int main(int argc, char** argv)
         File.flush();
         File.close();
     }
-    doPliku("B");
     doPliku("A");
-
+    doPliku("B");
+    doPliku("C");
 
     return 0;
 }

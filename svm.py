@@ -1,17 +1,17 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # Importing the libraries
 # math
-import numpy as np
+#import numpy as np
 # plot
 # import matplotlib.pyplot as plt
 # datasets managing
 import pandas as pd
 
 # Importing the dataset (HOG)
-datasetHOG = pd.read_csv('/home/alicja/gnu/projekt_wma/data/hogFeatures/hog.txt', header = None, sep = ',')
+datasetHOG = pd.read_csv('data/hogFeatures/hog.txt', header = None, sep = ',')
 X_hog = datasetHOG.iloc[:, :-1].values
-Y_hog = datasetHOG.iloc[:, 3780].values
+Y_hog = datasetHOG.iloc[:, 288].values
 
 # Splitting the dataset into the Training set and Test set
 from sklearn.cross_validation import train_test_split
