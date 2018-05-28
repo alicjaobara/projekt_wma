@@ -9,14 +9,13 @@ import numpy as np
 import pandas as pd
 
 # Importing the dataset (HOG)
-datasetHOG = pd.read_csv('/home/alicja/gnu/projekt_wma/data/hogFeatures/hog_A.txt')
-X = datasetHOG.iloc[:, -1].values
-"""
-y = datasetHOG.iloc[:, ].values
+datasetHOG = pd.read_csv('/home/alicja/gnu/projekt_wma/data/hogFeatures/hog.txt', header = None, sep = ',')
+X_hog = datasetHOG.iloc[:, :-1].values
+Y_hog = datasetHOG.iloc[:, 3780].values
 
 # Splitting the dataset into the Training set and Test set
 from sklearn.cross_validation import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.25, random_state = 0)
+X_train, X_test, y_train, y_test = train_test_split(X_hog, Y_hog, test_size = 0.1, random_state = 0)
 
 # Feature Scaling
 from sklearn.preprocessing import StandardScaler
@@ -35,4 +34,3 @@ y_pred = classifier.predict(X_test)
 # Making the Confusion Matrix
 from sklearn.metrics import confusion_matrix
 cm = confusion_matrix(y_test, y_pred)
-"""
